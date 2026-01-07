@@ -1,0 +1,83 @@
+# ===============================
+# Node / JS
+# ===============================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+
+# ===============================
+# Environment files
+# ===============================
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# ===============================
+# OS / Editor junk
+# ===============================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ===============================
+# Backend uploads & temp
+# ===============================
+backend/uploads/
+backend/tmp/
+
+# ===============================
+# Logs
+# ===============================
+logs/
+*.log
+
+# ===============================
+# Python / ML
+# ===============================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+
+# ML models (heavy files)
+*.pt
+*.h5
+*.onnx
+
+# ===============================
+# PWA / Service Worker cache
+# ===============================
+workbox-*.js
+sw-build.js
+
+# ===============================
+# Database dumps
+# ===============================
+*.sqlite
+*.db
+*.dump
+
+# ===============================
+# Docker
+# ===============================
+.dockerignore
+docker-compose.override.yml
+
+# ===============================
+# Misc
+# ===============================
+coverage/
