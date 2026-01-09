@@ -9,7 +9,7 @@ export default function Home() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const res = await fetch(`${api}` , {method: "GET"});
+      const res = await fetch(`${api}/login` , {method: "GET"});
       const data = await res.json();
       console.log(data);
     };
