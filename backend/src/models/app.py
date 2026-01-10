@@ -7,9 +7,9 @@ from detector import AnimalDetector
 from health import assess_health
 from utils import draw_boxes
 
-st.set_page_config(page_title="Anitect", layout="wide")
+st.set_page_config(page_title="PashuCare AI", layout="wide")
 
-st.title("Anitect")
+st.title("PashuCare AI")
 
 detector = AnimalDetector()
 
@@ -47,4 +47,5 @@ if uploaded_file:
         if health["At Risk"] > 0:
             st.warning("Some animals may need veterinary attention")
         else:
+
             st.success("Livestock appears healthy")
