@@ -1,6 +1,7 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IHealthRecord extends Document {
+  tagId: string;
   animal: Types.ObjectId;
   postureScore?: number;
   visibleIssue?: string;
@@ -11,6 +12,7 @@ export interface IHealthRecord extends Document {
 
 const HealthRecordSchema = new Schema<IHealthRecord>(
   {
+    tagId: { type: String, required: true },
     animal: { type: Schema.Types.ObjectId, ref: 'Animal', required: true },
     postureScore: Number,
     visibleIssue: String,
