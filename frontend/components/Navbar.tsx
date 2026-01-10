@@ -14,19 +14,20 @@ export default function Navbar() {
           </span>
         </div>
 
-        {/* <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
-          <Link href="#" className="hover:text-red-500 transition-colors">How it works</Link>
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
+          <Link href="/" className="hover:text-red-500 transition-colors">Home</Link>
+          {/* <Link href="#" className="hover:text-red-500 transition-colors">How it works</Link>
           <Link href="#" className="hover:text-red-500 transition-colors">Features</Link>
-          <Link href="#" className="hover:text-red-500 transition-colors">About</Link>
-        </div> */}
+          <Link href="#" className="hover:text-red-500 transition-colors">About</Link> */}
+        </div>
 
         <div className="flex items-center gap-4">
-          <button className="px-5 py-2 text-sm font-semibold text-white hover:text-red-500 transition-colors">
+          <Link href="/login" className="px-5 py-2 text-sm font-semibold text-white hover:text-red-500 transition-colors">
             Login
-          </button>
-          <button className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 rounded-full hover:bg-red-700 transition-all shadow-lg shadow-red-900/20 active:scale-95">
+          </Link>
+          <Link href="/register" className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 rounded-full hover:bg-red-700 transition-all shadow-lg shadow-red-900/20 active:scale-95">
             Register
-          </button>
+          </Link>
         </div>
       </div>
     </nav>
