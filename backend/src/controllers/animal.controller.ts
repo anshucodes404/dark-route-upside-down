@@ -3,7 +3,6 @@ import z from "zod"
 import ApiResponse from "../utils/ApiResponse";
 import ServerError from "../utils/ServerError";
 import Animal from "../models/animal.model";
-import path from "path";
 import fs from "fs"
 import HealthRecord from "../models/healthRecords.model";
 export const attendanceSchema = z.object({
@@ -78,7 +77,7 @@ export async function attendance(req: Request, res: Response) {
 }
 
 
-// Get attendance records for a specific animal by tagId
+// Get health records for a specific animal by tagId
 export async function getHealthRecordsOftheAnimalInitiatedByVet(req: Request, res: Response) {
     try {
         const { tagId } = req.params;
@@ -93,9 +92,6 @@ export async function getHealthRecordsOftheAnimalInitiatedByVet(req: Request, re
                 new ApiResponse(false, `Animal with ID ${tagId} not found`, null)
             );
         }
-
-
-
 
         // const attendanceData = {
         //     tagId: animal.tagId,
@@ -116,7 +112,7 @@ export async function getHealthRecordsOftheAnimalInitiatedByVet(req: Request, re
 }
 
 
-export async function getAnimalsAttendanceLogsOwnedByUser(req: Request, res: Response) {
+export async function getAnimalsAttendanceLogsOwnedByUserinQRpage(req: Request, res: Response) {
     try {
         const userId = req.user?._id;
         const startOfDay = new Date();
@@ -154,6 +150,79 @@ export async function getAnimalsAttendanceLogsOwnedByUser(req: Request, res: Res
         );
     } catch (error) {
         console.error('Get attendance error:', error);
+        ServerError(res, error);
+    }
+}
+
+export async function getAttendanceRecordsforDashboard(req: Request, res: Response){
+    try {
+        const userId = req.user?._id;
+
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const animals = await Animal.aggregate([
+            {
+                $match: {
+                    owner: userId
+                }
+            },
+            {
+                $lookup: {
+                    from: "healthrecords",
+                    localField: "_id",
+                    foreignField: "animal",
+                    as: "healthRecords"
+                }
+            },
+            {
+                $addFields: {
+                    present: {
+                        $cond: [
+                            {
+                                $and: [
+                                    { $ne: ["$attendanceLogs", null] },
+                                    { $gt: [{ $size: "$attendanceLogs" }, 0] },
+                                    {
+                                        $gte: [
+                                            { $arrayElemAt: ["$attendanceLogs", -1] },
+                                            startOfDay
+                                        ]
+                                    },
+                                    {
+                                        $lte: [
+                                            { $arrayElemAt: ["$attendanceLogs", -1] },
+                                            endOfDay
+                                        ]
+                                    }
+                                ]
+                            },
+                            true,
+                            false
+                        ]
+                    }
+                }
+            },
+            {
+                $project: {
+                    tagId: 1,
+                    species: 1,
+                    breed: 1,
+                    createdAt: 1,
+                    attendanceLogs: 1,
+                    present: 1,
+                    healthRecords: 1
+                }
+            }
+        ]);
+
+        return res.status(200).json(
+            new ApiResponse(true, "Attendance and health records retrieved successfully", animals)
+        );
+    } catch (error) {
+        console.error('Get attendance records error:', error);
         ServerError(res, error);
     }
 }
