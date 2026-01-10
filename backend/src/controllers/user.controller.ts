@@ -34,7 +34,7 @@ export async function loginUser(req: Request, res: Response) {
         const { phone, password } = parsedData.data;
 
         const user = await User.findOne({ phone });
-
+        console.log(user)
         if (!user) {
             return res.status(404).json(
                 new ApiResponse(false, "User not found")
@@ -42,7 +42,7 @@ export async function loginUser(req: Request, res: Response) {
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
-
+        console.log(isPasswordValid)
         if (!isPasswordValid) {
             return res.status(401).json(
                 new ApiResponse(false, "Invalid password")
