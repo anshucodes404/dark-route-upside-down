@@ -66,12 +66,12 @@ export async function loginUser(req: Request, res: Response) {
         return res
             .status(200)
             .cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        }).json(
-            new ApiResponse(true, "LoginSuccessful", user)
-        )
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                maxAge: 7 * 24 * 60 * 60 * 1000
+            }).json(
+                new ApiResponse(true, "LoginSuccessful", user)
+            )
     } catch (error) {
         ServerError(res, error)
     }
