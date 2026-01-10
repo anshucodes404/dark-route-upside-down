@@ -84,7 +84,7 @@ export default function Login() {
 
         <div className="relative z-10 w-full max-w-md">
           <div className="bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl relative">
-            <div className="absolute top-0 right-12 w-24 h-px bg-gradient-to-r from-transparent via-red-500 to-transparent" />
+            <div className="absolute top-0 right-12 w-24 h-px bg-linear-to-r from-transparent via-red-500 to-transparent" />
             
             <div className="text-center mb-10">
               <h1 className="text-3xl font-extrabold tracking-tight mb-2">

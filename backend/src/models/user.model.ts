@@ -10,6 +10,7 @@ export interface IUser extends Document {
   location?: string;
   createdAt: Date;
 }
+
 const UserSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
