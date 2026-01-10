@@ -30,8 +30,10 @@ export default function Register() {
   });
 
   const { register, handleSubmit, watch, setError, formState: { errors } } = form;
+  const passwordValue = watch("password");
 
   const onSubmit = async (data: registerSchema) => {
+
     setIsLoading(true);
     setErrorMessage(null);
 

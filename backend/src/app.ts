@@ -4,6 +4,8 @@ import type { Request, Response, NextFunction } from 'express';
 import cookieParser from "cookie-parser"
 import userRouter from './routes/user.route';
 import animalRouter from './routes/animal.route';
+import farmerRouter from './routes/farmer.route';
+import vetRouter from './routes/vet.route';
 
 
 const app = express();
@@ -30,6 +32,8 @@ app.get("/wake", (req, res: Response) => {
 
 app.use("/api/user", userRouter);
 app.use("/api/animal", animalRouter);
+app.use("/api/farmer", farmerRouter)
+app.use("/api/vet", vetRouter)
 
 
 export default app;

@@ -43,6 +43,9 @@ export default function Login() {
         throw new Error("Server returned an invalid response. Please check the URL.");
       }
 
+        body: JSON.stringify(data),
+      });
+
       const result = await response.json();
 
       if (response.ok) {
@@ -72,16 +75,12 @@ export default function Login() {
         }
       } else if (response.status === 401 || response.status === 404) {
         setErrorMessage(result.message || "Invalid phone number or password.");
-      } else if (response.status === 500) {
-        // Detailed error for 500 Internal Server Error
-        setErrorMessage(result?.message || "Internal Server Error. Please contact support.");
-        console.error("Server Side Error:", result?.err || result?.message || "Unknown server error");
       } else {
         setErrorMessage(result.message || "An unexpected error occurred.");
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Login Error:", error);
-      setErrorMessage(error.message || "Networking error. Please check your connection.");
+      setErrorMessage("Networking error. Please check your connection.");
     } finally {
       setIsLoading(false);
     }
@@ -97,7 +96,7 @@ export default function Login() {
 
         <div className="relative z-10 w-full max-w-md">
           <div className="bg-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl relative">
-            <div className="absolute top-0 right-12 w-24 h-px bg-gradient-to-r from-transparent via-red-500 to-transparent" />
+            <div className="absolute top-0 right-12 w-24 h-px bg-linear-to-r from-transparent via-red-500 to-transparent" />
             
             <div className="text-center mb-10">
               <h1 className="text-3xl font-extrabold tracking-tight mb-2">

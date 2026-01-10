@@ -3,10 +3,8 @@ import z from "zod"
 import ApiResponse from "../utils/ApiResponse";
 import ServerError from "../utils/ServerError";
 import Animal from "../models/animal.model";
-import HealthRecord from "../models/healthRecords.model";
-import path from "path";
 import fs from "fs"
-
+import HealthRecord from "../models/healthRecords.model";
 export const attendanceSchema = z.object({
     tagId: z.string().min(1, "Animal ID is required"),
     date: z.date().optional(),
@@ -79,30 +77,33 @@ export async function attendance(req: Request, res: Response) {
 }
 
 
-// Get attendance records for a specific animal by tagId
-export async function getAttendanceRecords(req: Request, res: Response) {
+// Get health records for a specific animal by tagId
+export async function getHealthRecordsOftheAnimalInitiatedByVet(req: Request, res: Response) {
     try {
         const { tagId } = req.params;
 
-        const animal = await Animal.findOne({ tagId: tagId });
+        const animal = await HealthRecord.find({
+            tagId: tagId,
+            healthFlag: { $in: ["high", "medium"] }
+        }).sort({ createdAt: -1 });
 
-        if (!animal) {
+        if (!animal || animal.length === 0) {
             return res.status(404).json(
                 new ApiResponse(false, `Animal with ID ${tagId} not found`, null)
             );
         }
 
-        const attendanceData = {
-            tagId: animal.tagId,
-            animalName: `${animal.species}${animal.breed ? ` - ${animal.breed}` : ''}`,
-            totalAttendance: animal.attendanceLogs?.length || 0,
-            attendanceLogs: animal.attendanceLogs || [],
-            createdAt: animal.createdAt
-        };
+        // const attendanceData = {
+        //     tagId: animal.tagId,
+        //     animalName: `${animal.species}${animal.breed ? ` - ${animal.breed}` : ''}`,
+        //     totalAttendance: animal.attendanceLogs?.length || 0,
+        //     attendanceLogs: animal.attendanceLogs || [],
+        //     createdAt: animal.createdAt
+        // };
 
-        return res.status(200).json(
-            new ApiResponse(true, "Attendance records retrieved successfully", attendanceData)
-        );
+        // return res.status(200).json(
+        //     new ApiResponse(true, "Attendance records retrieved successfully", attendanceData)
+        // );
 
     } catch (error) {
         console.error('Get attendance error:', error);
@@ -110,79 +111,118 @@ export async function getAttendanceRecords(req: Request, res: Response) {
     }
 }
 
-export async function getDashboardStats(req: Request, res: Response) {
+
+export async function getAnimalsAttendanceLogsOwnedByUserinQRpage(req: Request, res: Response) {
     try {
-        const ownerId = req.user?._id;
+        const userId = req.user?._id;
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
 
-        if (!ownerId) {
-            return res.status(401).json(new ApiResponse(false, "Authentication required"));
-        }
-
-        const animals = await Animal.find({ owner: ownerId });
-        const totalAnimals = animals.length;
-
-        if (totalAnimals === 0) {
-            return res.status(200).json(
-                new ApiResponse(true, "No animals found", {
-                    presentCount: 0,
-                    absentPercentage: 0,
-                    flaggedCount: 0,
-                    syncStatus: "Synced"
-                })
-            );
-        }
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        let presentCount = 0;
-        const animalIds = animals.map(a => a._id);
-
-        animals.forEach(animal => {
-            const hasLogToday = animal.attendanceLogs?.some(logDate => {
-                const d = new Date(logDate);
-                d.setHours(0, 0, 0, 0);
-                return d.getTime() === today.getTime();
-            });
-            if (hasLogToday) presentCount++;
-        });
-
-        const absentCount = totalAnimals - presentCount;
-        const absentPercentage = Math.round((absentCount / totalAnimals) * 100);
-
-        // Get flagged animals (Risk Level High or Medium in latest record)
-        const healthRecords = await HealthRecord.find({
-            animal: { $in: animalIds }
-        }).sort({ createdAt: -1 });
-
-        // Group by animal and take the latest
-        const latestRecordsMap = new Map();
-        healthRecords.forEach(record => {
-            if (!latestRecordsMap.has(record.animal.toString())) {
-                latestRecordsMap.set(record.animal.toString(), record);
+        const animals = await Animal.aggregate([
+            {
+                $match: {
+                    owner: userId,
+                    createdAt: { $gte: startOfDay, $lte: endOfDay }
+                }
+            },
+            {
+                $lookup: {
+                    from: "healthrecords",
+                    localField: "tagId",
+                    foreignField: "tagId",
+                    as: "healthRecords"
+                },
+            },
+            {
+                $project: {
+                    tagId: 1,
+                    species: 1,
+                    createdAt: 1,
+                    healthRecords: 1,
+                }
             }
-        });
-
-        let flaggedCount = 0;
-        latestRecordsMap.forEach(record => {
-            if (record.riskLevel === 'high' || record.riskLevel === 'medium') {
-                flaggedCount++;
-            }
-        });
-
-        const stats = {
-            presentCount,
-            absentPercentage,
-            flaggedCount,
-            syncStatus: "Synced"
-        };
+        ])
 
         return res.status(200).json(
-            new ApiResponse(true, "Dashboard stats retrieved successfully", stats)
+            new ApiResponse(true, "Today's animals retrieved successfully", animals)
         );
-
     } catch (error) {
-        console.error('Get Dashboard Stats error:', error);
+        console.error('Get attendance error:', error);
+        ServerError(res, error);
+    }
+}
+
+export async function getAttendanceRecordsforDashboard(req: Request, res: Response){
+    try {
+        const userId = req.user?._id;
+
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const animals = await Animal.aggregate([
+            {
+                $match: {
+                    owner: userId
+                }
+            },
+            {
+                $lookup: {
+                    from: "healthrecords",
+                    localField: "_id",
+                    foreignField: "animal",
+                    as: "healthRecords"
+                }
+            },
+            {
+                $addFields: {
+                    present: {
+                        $cond: [
+                            {
+                                $and: [
+                                    { $ne: ["$attendanceLogs", null] },
+                                    { $gt: [{ $size: "$attendanceLogs" }, 0] },
+                                    {
+                                        $gte: [
+                                            { $arrayElemAt: ["$attendanceLogs", -1] },
+                                            startOfDay
+                                        ]
+                                    },
+                                    {
+                                        $lte: [
+                                            { $arrayElemAt: ["$attendanceLogs", -1] },
+                                            endOfDay
+                                        ]
+                                    }
+                                ]
+                            },
+                            true,
+                            false
+                        ]
+                    }
+                }
+            },
+            {
+                $project: {
+                    tagId: 1,
+                    species: 1,
+                    breed: 1,
+                    createdAt: 1,
+                    attendanceLogs: 1,
+                    present: 1,
+                    healthRecords: 1
+                }
+            }
+        ]);
+
+        return res.status(200).json(
+            new ApiResponse(true, "Attendance and health records retrieved successfully", animals)
+        );
+    } catch (error) {
+        console.error('Get attendance records error:', error);
         ServerError(res, error);
     }
 }
