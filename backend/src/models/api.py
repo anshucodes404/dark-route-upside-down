@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 
-app = FastAPI(title="AI Livestock Health API")
+app = FastAPI(title="PashuCare AI Health API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # hackathon safe
@@ -25,7 +25,7 @@ detector = AnimalDetector()
 # -----------------------------
 @app.get("/health")
 def health_check():
-    return {"status": "AI Livestock API is running"}
+    return {"status": "PashuCare AI API is running"}
 
 # -----------------------------
 # 2. Image Analysis Endpoint
@@ -54,4 +54,5 @@ async def analyze_image(file: UploadFile = File(...)):
         "species_count": species_count,
         "health": health,
         "detections": detections
+
     }
