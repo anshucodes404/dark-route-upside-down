@@ -55,13 +55,23 @@ export async function loginUser(req: Request, res: Response) {
             _id: user._id
         }
 
-        const secret = process.env.JWT_SECRET as string
+        const secret = process.env.JWT_SECRET || 'pashucare_ai_development_secret_key_123';
+        if (!secret) {
+            console.error("JWT_SECRET is not defined in .env and no fallback available");
+            return res.status(500).json(new ApiResponse(false, "Internal server error: JWT_SECRET missing"));
+        }
 
         const expiresIn = {
             expiresIn: "7d" as SignOptions["expiresIn"]
         }
 
-        const token = jwt.sign(payload, secret, expiresIn)
+        let token;
+        try {
+            token = jwt.sign(payload, secret, expiresIn);
+        } catch (jwtError: any) {
+            console.error("JWT signing failed:", jwtError);
+            return res.status(500).json(new ApiResponse(false, "Internal server error: " + jwtError.message));
+        }
 
         return res
             .status(200)

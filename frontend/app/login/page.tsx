@@ -31,6 +31,18 @@ export default function Login() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+
+      // Safely parse JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Non-JSON response received:", text);
+        throw new Error("Server returned an invalid response. Please check the URL.");
+      }
+
         body: JSON.stringify(data),
       });
 

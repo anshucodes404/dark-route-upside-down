@@ -22,8 +22,8 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cookieParser())
 
 app.get("/wake", (req, res: Response) => {
-  res.json({ 
-    message: "Server is awake!", 
+  res.json({
+    message: "Server is awake!",
     timestamp: new Date().toISOString(),
     status: "active"
   });
